@@ -1,0 +1,288 @@
+<html>
+	<head>
+		<title>EasyZip User Guide</title>
+
+		<style>
+			body
+			{
+				width: 700px;
+				margin: auto;
+				background: #dedede;
+			}
+
+			.justify
+			{
+				text-align: justify;
+			}
+
+			.indent
+			{
+				margin-left: 3EM;
+			}
+
+			.center
+			{
+				text-align: center;
+			}
+
+			pre
+			{
+				background: #efefef;
+			}
+
+			dt
+			{
+				font-weight: bold;
+			}
+
+			dd
+			{
+				margin:0 0 1EM 3EM;
+			}
+		</style>
+	</head>
+
+	<body>
+		<center>
+			<h2>EasyZip User Guide</h2>
+			<p class="center">
+				By: Nick Gravelyn<br />
+				<a href="http://github.com/nickgravelyn">http://github.com/nickgravelyn</a><br />
+				<a href="mailto:nickgravelyn@gmail.com">nickgravelyn@gmail.com</a><br /><br />
+
+				Latest Installed Version: 1.3<br />
+				<a href="http://github.com/nickgravelyn/easyzip">EasyZip Homepage</a><br />
+			</p>
+		</center>
+
+		<p class="justify">
+			Welcome to EasyZip, the easiest way to manage your XNA Game Studio 2.0 game's growing content sizes. EasyZip is an incredibly simple solution to automatically add all your content pipeline files into a convenient ZIP file and read these assets from the ZIP file at runtime. This process can reduce your built content sizes by up to 70%!
+		</p>
+
+		<hr />
+		<h3>Latest Version Change Log/Known Issus</h3>
+		<div class="justify, indent">
+			<b>v1.3</b>
+			<div class="justify, indent">
+				<b>Changes:</b><br />
+				- Removed strong-name signing. Too many issues with it. (Users can download the source and sign their own version if desired)<br />
+				- Added ExcludedExtensions to the ZipWriter to prevent XACT content from being put into the ZIP file.<br />
+				- Added FileName property to ZipContentManager<br />
+				- Removed all audio loading methods from ZipContentManager<br />
+				<br />
+				<b>Known Issues:</b><br />
+				- Non content pipeline files cannot be added to zip file.
+			</div>
+		</div>
+
+		<hr />
+		<h3>Getting Started</h3>
+		<p class="justify">
+			Since you already have EasyZip installed, you have most of the work out of the way. The next step to take advantage of the library is to either create a new XNA Game Studio 2.0 project or find an existing XNA Game Studio 2.0 project. After the project has been created, make sure it is not open in Visual Studio. Attempting to update a project that is open can lead to errors in the update process.
+		</p>
+
+		<p class="justify">
+			Once a project has been created or located, we can run the EasyZip Project Utility to modify the .csproj and .contentproj files that make up your game project. You can launch the EasyZip Project Utility from the Start Menu (All Programs -> EasyZip -> Project Utility). Once open, browse to the game project (.csproj) or type in the path.
+		</p>
+		<p class="justify">
+			Next choose the options you wish. You can have the Project Utiltiy create backup projects for you if you would like. This can be useful in case problems occur later. You can then select whether or not you want the ZIP file to maintain the folder structure. If this box is checked, any folders you create in your content project will be brought over to the ZIP file. If this box is unchecked, all your content will be placed in the ZIP file with no folders at all. You are always able to run the utility against your project again later to change this option.
+		</p>
+
+		<p class="center"><img src=".\Images\projectupdater.jpg" /></p>
+
+		<p class="justify">
+			Once you are presented with a message box informing you the update process was successful, you are ready to begin programming with EasyZip. The content project has all the instructions it needs to create the ZIP file and the game project has the proper references added to it.
+		</p>
+
+		<hr />
+		<h3>Loading Content</h3>
+		<p class="justify">
+			Content loaded with EasyZip uses a derived ContentManager called ZipContentManager. This means the process of loading content with EasyZip is almost identical to using the standard ContentManager.
+		</p>
+
+		<div class="justify">
+			To begin using EasyZip in your code, add a new using statement for the EasyZip namespace:<br />
+			<pre class="code">using EasyZip;</pre>
+
+			Next declare a new ZipContentManager in your class:<br />
+			<pre class="code">ZipContentManager zipContent;</pre>
+
+			Next instantiate the ZipContentManager. The constructor is similart to the normal ContentManager constructor in that it requires an IServiceProvider instance (usually Game.Services). The constructor also requires a path to the ZIP file. The ZIP file created will always be next to your game executable and will have the same name as the content subproject. So by default the name is Content.ZIP:<br />
+			<pre class="code">zipContent = new ZipContentManager(Services, "Content.zip");</pre>
+
+			Lastly we just load content like we would any other ContentManager:<br />
+	<pre>SpriteFont font = zipContent.Load&lt;SpriteFont&gt;("Arial");</pre>
+		</div>
+
+		<p class="justify">
+			Here is an entire Game class filled in to demonstrate the EasyZip capabilities:
+		</p>
+		<pre>using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+
+using EasyZip;
+
+namespace WindowsGame1
+{
+	public class Game1 : Microsoft.Xna.Framework.Game
+	{
+		ZipContentManager zipContent;
+		GraphicsDeviceManager graphics;
+		SpriteBatch spriteBatch;
+		SpriteFont font;
+
+		public Game1()
+		{
+			graphics = new GraphicsDeviceManager(this);
+			Content.RootDirectory = "Content";
+
+			zipContent = new ZipContentManager(Services, "Content.zip");
+		}
+
+		protected override void LoadContent()
+		{
+			spriteBatch = new SpriteBatch(GraphicsDevice);
+			font = zipContent.Load&lt;SpriteFont&gt;(@"Arial");
+		}
+
+		protected override void Draw(GameTime gameTime)
+		{
+			graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
+
+			spriteBatch.Begin(SpriteBlendMode.AlphaBlend);
+			spriteBatch.DrawString(
+				font,
+				"Hello EasyZip!",
+				new Vector2(100),
+				Color.White);
+			spriteBatch.End();
+
+			base.Draw(gameTime);
+		}
+	}
+}</pre>
+
+		<hr />
+		<h3>API Reference</h3>
+		<p class="justify">
+			This section details the API of the ZipContentManager class that are not a part of the default ContentManager.
+		</p>
+
+		<div>
+			<dl>
+				<dt>public ZipContentManager(IServiceProvider serviceProvider, string zipFile)</dt>
+				<dd>
+				Creates a new ZipContentManager that loads files from the given ZIP file. The default constructor enforces case sensitivity for asset names and file names.<br />
+	<pre>ZipContentManager zipContent = new ZipContentManager(
+	Services,
+	"Content.zip");</pre>
+				</dd>
+
+				<dt>public ZipContentManager(IServiceProvider serviceProvider, string zipFile, bool caseSensitive)</dt>
+				<dd>
+				Creates a new ZipContentManager that loads files from the given ZIP file with the ability to explicitly set case sensitivity for file names.<br />
+	<pre>ZipContentManager zipContent = new ZipContentManager(
+	Services,
+	"Content.zip",
+	false);</pre>
+	</dd>
+
+				<dt>public string[] GetAssetNames()</dt>
+				<dd>
+					Returns an array of the asset names of the content inside the ZIP file.<br />
+<pre>string[] files = zipContent.GetAssetNames();
+foreach (string file in files)
+{
+	Console.WriteLine(file);
+}</pre>
+				</dd>
+
+				<dt>public string[] GetAssetNamesFromDirectory(string directory)</dt>
+				<dd>
+					Returns an array of asset names from a specific directory within the ZIP file.<br />
+<pre>string[] files = zipContent.GetAssetNamesFromDirectory("Textures");
+List&lt;Texture2D&gt; textures = new List&lt;Texture2D&gt;();
+foreach (string file in files)
+{
+	textures.Add(zipContent.Load&lt;Texture2D&gt;(file));
+}</pre>
+				</dd>
+
+				<dt>public Stream GetFileStream(string filename)</dt>
+				<dd>
+					Returns a Stream for any file inside the ZIP file.<br />
+<pre>Stream stream = zipContent.GetFileStream("somefile.txt");
+using (StreamReader reader = new StreamReader(stream))
+{
+	Console.WriteLine(reader.ReadLine());
+}
+</pre>
+				</dd>
+			</dl>
+		</div>
+
+		<hr />
+		<h3>Change Log/Known Issues</h3>
+
+		<div class="justify, indent">
+			<b>v1.3</b>
+			<div class="justify, indent">
+				<b>Changes:</b><br />
+				- Removed strong-name signing. Too many issues with it. (Users can download the source and sign their own version if desired)<br />
+				- Added ExcludedExtensions to the ZipWriter to prevent XACT content from being put into the ZIP file.<br />
+				- Added FileName property to ZipContentManager<br />
+				- Removed all audio loading methods from ZipContentManager<br />
+				<br />
+				<b>Known Issues:</b><br />
+				- Non content pipeline files cannot be added to zip file.
+			</div>
+		</div>
+
+		<div class="justify, indent">
+			<b>v1.2</b>
+			<div class="justify, indent">
+				<b>Changes:</b><br />
+				- Zip file no longer generated if content files have not been rebuilt.<br />
+				- EasyZip assemblies are now signed with a strong-name key file.<br />
+				- Project Updater uses its running directory to determine the installation directory of EasyZip.<br />
+				- Open Sourced EasyZip!<br />
+				<br />
+				<b>Known Issues:</b><br />
+				- Build process still creates empty "Content" folder in output directory.<br />
+				- Non content pipeline files cannot be added to zip file.
+			</div>
+		</div>
+
+		<div class="justify, indent">
+			<b>v1.1</b>
+			<div class="justify, indent">
+				<b>Changes:</b><br />
+				- Shortened version number<br />
+				- Changed "Project Updater" to "Project Utility"<br />
+				- Made Project Utility able to upgrade projects from older versions of EasyZip<br />
+				- Removed all the message boxes from Project Utility<br />
+				- Fixed bug when trying to build ZIP after the output directory has been deleted<br />
+				- Added option to not create backup project files<br />
+				- Added option to choose whether or not ZIP file should maintain the content folder structure<br />
+				<br />
+				<b>Known Issues:</b><br />
+				- Build process still creates empty "Content" folder in output directory.<br />
+				- Non content pipeline files cannot be added to zip file.
+			</div>
+		</div>
+
+		<div class="justify, indent">
+			<b>v1.0.0</b>
+			<div class="justify, indent">
+				<b>Changes:</b><br />
+				- (Initial Release)<br />
+				<br />
+				<b>Known Issues:</b><br />
+				- Build process still creates empty "Content" folder in output directory.<br />
+				- Non content pipeline files cannot be added to zip file.
+			</div>
+		</div>
+	</body>
+</html>
